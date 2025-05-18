@@ -4,7 +4,7 @@ import sys
 from PySide6.QtWidgets import QApplication, QMainWindow, QDialog
 
 from scr.controller.login_controller import LoginController
-from scr.controller.bd_conn_controller import ConexionBDController
+from scr.controller.connection_controller import ConnectionController
 from scr.controller.estudiantes_controller import EstudiantesController
 
 def login(app):
@@ -52,7 +52,7 @@ def main():
     """
     app = QApplication(sys.argv)
 
-    config_window = ConexionBDController()
+    config_window = ConnectionController()
     config_window.setModal(True)
 
     if config_window.exec() == QDialog.Accepted:

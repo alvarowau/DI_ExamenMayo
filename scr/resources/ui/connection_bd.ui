@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>ConexionBD</class>
- <widget class="QDialog" name="ConexionBD">
+ <class>connection_bd</class>
+ <widget class="QDialog" name="connection_bd">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -23,14 +23,14 @@
    </size>
   </property>
   <property name="windowTitle">
-   <string>ConexiónBD</string>
+   <string>Connection data base</string>
   </property>
   <property name="toolTip">
-   <string>Conexión a BD</string>
+   <string>connection_db</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="QLabel" name="vCLblTitulo">
+    <widget class="QLabel" name="txt_title">
      <property name="maximumSize">
       <size>
        <width>16777215</width>
@@ -55,7 +55,7 @@
     </widget>
    </item>
    <item>
-    <widget class="QLabel" name="vCLblTitulo_2">
+    <widget class="QLabel" name="txt_subtitle">
      <property name="font">
       <font>
        <pointsize>12</pointsize>
@@ -76,7 +76,7 @@
    <item>
     <layout class="QFormLayout" name="formLayout">
      <item row="0" column="0">
-      <widget class="QLabel" name="vcLblNombre">
+      <widget class="QLabel" name="txt_bd">
        <property name="font">
         <font>
          <pointsize>14</pointsize>
@@ -95,7 +95,7 @@
       </widget>
      </item>
      <item row="0" column="1">
-      <widget class="QLineEdit" name="vcTxtBD">
+      <widget class="QLineEdit" name="line_bd">
        <property name="enabled">
         <bool>true</bool>
        </property>
@@ -111,7 +111,7 @@
       </widget>
      </item>
      <item row="1" column="0">
-      <widget class="QLabel" name="vcLblNombre_2">
+      <widget class="QLabel" name="txt_user">
        <property name="font">
         <font>
          <pointsize>14</pointsize>
@@ -130,7 +130,7 @@
       </widget>
      </item>
      <item row="1" column="1">
-      <widget class="QLineEdit" name="vcTxtUsuario">
+      <widget class="QLineEdit" name="line_user">
        <property name="enabled">
         <bool>true</bool>
        </property>
@@ -145,7 +145,7 @@
       </widget>
      </item>
      <item row="2" column="0">
-      <widget class="QLabel" name="vcLblNombre_3">
+      <widget class="QLabel" name="txt_password">
        <property name="font">
         <font>
          <pointsize>13</pointsize>
@@ -164,7 +164,7 @@
       </widget>
      </item>
      <item row="2" column="1">
-      <widget class="QLineEdit" name="vcTxtContrasenia">
+      <widget class="QLineEdit" name="line_password">
        <property name="enabled">
         <bool>true</bool>
        </property>
@@ -179,7 +179,7 @@
       </widget>
      </item>
      <item row="3" column="0">
-      <widget class="QLabel" name="vcLblNombre_4">
+      <widget class="QLabel" name="txt_host">
        <property name="font">
         <font>
          <pointsize>14</pointsize>
@@ -198,7 +198,7 @@
       </widget>
      </item>
      <item row="3" column="1">
-      <widget class="QLineEdit" name="vcTxtHost">
+      <widget class="QLineEdit" name="line_host">
        <property name="enabled">
         <bool>true</bool>
        </property>
@@ -213,7 +213,7 @@
       </widget>
      </item>
      <item row="4" column="0">
-      <widget class="QLabel" name="vcLblNombre_5">
+      <widget class="QLabel" name="txt_port">
        <property name="font">
         <font>
          <pointsize>14</pointsize>
@@ -232,7 +232,7 @@
       </widget>
      </item>
      <item row="4" column="1">
-      <widget class="QLineEdit" name="vcTxtPuerto">
+      <widget class="QLineEdit" name="line_port">
        <property name="enabled">
         <bool>true</bool>
        </property>
@@ -249,7 +249,7 @@
     </layout>
    </item>
    <item>
-    <widget class="QPushButton" name="vcbtnConfirmar">
+    <widget class="QPushButton" name="btn_acept">
      <property name="enabled">
       <bool>true</bool>
      </property>
