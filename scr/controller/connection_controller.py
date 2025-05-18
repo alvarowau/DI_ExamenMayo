@@ -4,11 +4,23 @@ from scr.models.repository import Repository
 from scr.util.message_box import MessageBox
 from scr.view.ui_connection_db import Ui_connection_bd
 
+
 class ConnectionController(QDialog):
-    '''
-    Clase que se encarga de mostrar el apartado de "Conexion BD" para que el user indica a donde apunta la BD con la que va a trabajar
-    '''
+    """Controlador para la configuración de conexión a base de datos.
+
+    Permite al usuario especificar los parámetros de conexión a la base de datos
+    y verifica que la conexión sea válida antes de aceptar la configuración.
+
+    Atributos:
+        ui (Ui_connection_bd): Interfaz gráfica del diálogo de conexión.
+    """
+
     def __init__(self):
+        """Inicializa el diálogo de configuración con valores por defecto.
+
+        Configura los campos de la interfaz con valores predeterminados y
+        conecta las señales de los botones a sus respectivos manejadores.
+        """
         super().__init__()
         self.ui = Ui_connection_bd()
         self.ui.setupUi(self)
@@ -21,7 +33,14 @@ class ConnectionController(QDialog):
         self.ui.btn_acept.clicked.connect(self.save_config)
 
     def save_config(self):
-        """Guarda la configuración y prueba la conexión a la BD."""
+        """Guarda la configuración y prueba la conexión con la base de datos.
+
+        Recoge los valores de los campos de texto, los almacena en la configuración
+        y verifica que la conexión sea posible. Muestra un mensaje con el resultado.
+
+        Raises:
+            Exception: Si ocurre algún error durante la conexión a la base de datos.
+        """
         config = {
             "host": self.ui.line_host.text(),
             "port": int(self.ui.line_port.text()) if self.ui.line_port.text().isdigit() else 3306,
@@ -30,13 +49,11 @@ class ConnectionController(QDialog):
             "db": self.ui.line_bd.text(),
         }
 
-        DBConfig.set_config(config)  # Guarda la configuración en DBConfig
-
-        # Verificar conexión a la base de datos
+        DBConfig.set_config(config)
         try:
-            dao = Repository()  # Intenta conectar con la BD
-            dao.close()  # Si funciona, cierra la conexión
+            dao = Repository()
+            dao.close()
             MessageBox("Conexión exitosa").show()
-            self.accept()  # Cierra el diálogo con éxito
+            self.accept()
         except Exception as e:
             MessageBox(f"Fallo en la conexión:\n{e}", "error").show()

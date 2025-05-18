@@ -59,7 +59,7 @@ SET FOREIGN_KEY_CHECKS=0;
 -- Insertar datos en tablas base
 
 INSERT INTO usuarios (usuario, contrasenia) VALUES
-('valentina', 'secreta'),
+('alvaro', 'alvaro'),
 ('hotel', 'Brianda23$');
 
 -- Insertar las poblaciones que aparecen en el combobox

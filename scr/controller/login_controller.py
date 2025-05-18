@@ -6,69 +6,82 @@ from scr.models.repository import UserDAO
 
 
 class LoginController(Ui_Login, QObject):
-    """
-    Controlador para gestionar el proceso de inicio de sesión en la interfaz de user.
+    """Controlador para la ventana de autenticación de usuarios.
+
+    Gestiona todo el proceso de inicio de sesión, incluyendo:
+    - Validación de campos
+    - Autenticación de credenciales
+    - Retroalimentación al usuario
+    - Cierre de sesión controlado
+
+    Atributos:
+        bLogado (bool): Bandera que indica si el login fue exitoso.
+        ui (Ui_Login): Instancia de la interfaz gráfica de login.
+        login_window (QWidget): Referencia a la ventana de login.
+        usuarios_dao (UserDAO): Objeto para acceder a datos de usuarios.
     """
 
     def __init__(self, login_window: QWidget):
-        """
-        Constructor de la clase LoginController.
+        """Inicializa el controlador de login con sus componentes.
 
         Args:
-            login_window (QWidget): La ventana de inicio de sesión.
+            login_window (QWidget): Ventana principal donde se mostrará el login.
         """
-        self.bLogado = False  # Variable para controlar si el user ha iniciado sesión con éxito
+        self.bLogado = False
         super().__init__()
-        self.ui = Ui_Login()  # Inicializa la interfaz de user del login
-        self.login_window = login_window  # Asigna la ventana pasada como parámetro
-        self.ui.setupUi(self.login_window)  # Configura la UI en la ventana de login
+        self.ui = Ui_Login()
+        self.login_window = login_window
+        self.ui.setupUi(self.login_window)
 
-        self.ui.line_user.setText('valentina')
-        self.ui.line_password.setText('secreta')
+        self.ui.line_user.setText('alvaro')
+        self.ui.line_password.setText('alvaro')
 
-        self.ui.btn_login.clicked.connect(self.login)  # Conecta el botón de acceso con la función login
+        self.ui.btn_login.clicked.connect(self.login)
 
         self.usuarios_dao = UserDAO()
 
     def login(self):
+        """Maneja el evento de click en el botón de login.
+
+        Realiza las siguientes acciones:
+        1. Obtiene y sanitiza los datos del formulario
+        2. Valida campos obligatorios
+        3. Autentica al usuario
+        4. Proporciona feedback visual
+        5. Cierra la ventana si la autenticación es exitosa
         """
-        Maneja el proceso de autenticación del user cuando se presiona el botón de acceso.
-        """
-        # Obtiene y limpia los datos ingresados por el user
         user = self.ui.line_user.text().strip()
         pwd = self.ui.line_password.text().strip()
 
-        message = "Logado con éxito" 
+        message = "Logado con éxito"
         msg_type = "error"
 
-        # Verifica las credenciales ingresadas
         self.bLogado = self.autenticar(user, pwd)
 
-        # Valida si los campos están vacíos
         if not user or not pwd:
             message = "Ambos campos son obligatorios"
-        elif self.bLogado == False:
+        elif not self.bLogado:
             message = "Usuario o contraseña incorrectos"
         elif self.bLogado:
-            msg_type = "success"  # Cambia el tipo de mensaje a éxito si la autenticación es correcta
-            
-        # Crea y muestra un cuadro de mensaje personalizado con el resultado del login
+            msg_type = "success"
+
         MessageBox(message, msg_type).show()
 
-        # Si la autenticación es correcta, cierra la ventana de login
         if self.bLogado:
             self.login_window.close()
 
-    def autenticar(self, user, pwd):
-        """
-        Verifica las credenciales del user llamando a la función check_credentials de UserDAO.
+    def autenticar(self, user: str, pwd: str) -> bool:
+        """Autentica las credenciales del usuario contra la base de datos.
 
         Args:
-            user (str): Nombre de user ingresado.
-            pwd (str): Contraseña ingresada.
+            user (str): Nombre de usuario proporcionado.
+            pwd (str): Contraseña proporcionada.
 
         Returns:
-            bool: True si las credenciales son correctas, False en caso contrario.
+            bool: True si las credenciales son válidas, False en caso contrario.
+
+        Notas:
+            Utiliza el UserDAO para verificar las credenciales en la capa de persistencia.
+            La contraseña debería manejarse de forma segura (hashing) en producción.
         """
-        # Llama al método check_credentials de UserDAO para verificar las credenciales
         return self.usuarios_dao.check_credentials(user, pwd)

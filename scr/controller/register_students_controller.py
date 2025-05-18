@@ -1,32 +1,76 @@
-from PySide6.QtWidgets import QWidget, QMessageBox, QDialog
+from PySide6.QtWidgets import QDialog
 from PySide6.QtCore import QDate
-from scr.view.estudiantes_ui import Ui_Estudiantes
 from scr.view.ui_register_students import Ui_students
 from scr.util.message_box import MessageBox
 from scr.util.validation import Validation
-import re
 from datetime import datetime
-import re
 from scr.models.repository import StudentRepository, CitiesRepository, ActivitiesRepository, StudentsActivitiesRepository
 from scr.models.models import StudentEntity
 
-class RegisterStudent(QDialog):
-    """
-    Controlador para la ventana de gestión de estudiantes, que permite la creación,
-    modificación y visualización de estudiantes.
-    """
-    def __init__(self, student_id=None):
-        """
-        Constructor de la clase RegisterStudent.
 
-        Parámetros:
-        estudiante_id (int): ID del estudiante a editar. Si es None, se crea un nuevo estudiante.
+def generate_username(name, surnames):
+    """Genera un nombre de usuario automático.
+    Args:
+        name (str): Nombre del estudiante
+        surnames (str): Apellidos del estudiante
+
+    Returns:
+        str: Nombre de usuario generado
+    """
+    parts = surnames.strip().split()
+    surname = parts[0]
+    username = name[0].lower() + surname.lower()
+    return username.replace(" ", "")
+
+
+def check_if_minor(date_of_birth):
+    """Determina si el estudiante es menor de edad.
+
+    Args:
+        date_of_birth (datetime.date): Fecha de nacimiento del estudiante
+
+    Returns:
+        bool: True si es menor de edad, False en caso contrario
+    """
+    today = datetime.now()
+    age = today.year - date_of_birth.year
+    if (today.month, today.day) < (date_of_birth.month, date_of_birth.day):
+        age -= 1
+    return age < 18
+
+
+class RegisterStudent(QDialog):
+    """Controlador para la ventana de gestión de estudiantes.
+
+    Permite la creación, modificación y visualización de estudiantes, incluyendo:
+    - Gestión de datos personales
+    - Asignación de actividades
+    - Validación de campos
+    - Manejo de modos de edición/visualización
+
+    Atributos:
+        student_activities_dao (StudentsActivitiesRepository): DAO para actividades de estudiantes
+        activities_dao (ActivitiesRepository): DAO para actividades
+        cities_dao (CitiesRepository): DAO para ciudades
+        student_dao (StudentRepository): DAO para estudiantes
+        student_id (int): ID del estudiante actual
+        student (StudentEntity): Datos del estudiante actual
+        is_new (bool): Indica si es un nuevo estudiante
+        is_edit (bool): Indica si está en modo edición
+        is_minor (bool): Indica si el estudiante es menor de edad
+        ui (Ui_students): Interfaz gráfica del formulario
+    """
+
+    def __init__(self, student_id=None):
+        """Inicializa el controlador del formulario de estudiantes.
+
+        Args:
+            student_id (int, optional): ID del estudiante a editar. None para nuevo estudiante.
         """
         self.student_activities_dao = None
         self.activities_dao = None
         self.cities_dao = None
         self.student_dao = None
-        print(f"tiene id????? {student_id}")
         try:
             super().__init__()
             self.ui = Ui_students()
@@ -37,12 +81,12 @@ class RegisterStudent(QDialog):
             self.is_minor = True
 
             if student_id:
-                print(f"trae id y es: {student_id} y es tipo {type(student_id)}")
                 self.student_id = student_id
-                self.student = self.student_dao.get(self.student_id)
+                if self.student_dao:
+                    self.student = self.student_dao.get(self.student_id)
                 self.is_new = False
                 self.is_edit = False
-            else:  # Nuevo estudiante
+            else:
                 self.student_id = None
                 self.student = None
                 self.is_new = True
@@ -56,30 +100,29 @@ class RegisterStudent(QDialog):
             MessageBox(f"Error al cargar el formulario: {str(e)}", "error").show()
 
     def initialize_daos(self):
-        """Inicializa los DAOs necesarios"""
+        """Inicializa los objetos de acceso a datos necesarios."""
         self.student_dao = StudentRepository()
         self.cities_dao = CitiesRepository()
         self.activities_dao = ActivitiesRepository()
         self.student_activities_dao = StudentsActivitiesRepository()
 
     def setup_events(self):
-        """Configura los eventos de los botones"""
+        """Configura los eventos de los controles de la interfaz."""
         self.ui.btn_save.clicked.connect(self.handle_save_button)
         self.ui.btn_delete.clicked.connect(self.close)
         self.ui.btn_delete.clicked.connect(self.handle_delete_button)
         self.ui.date_dob.dateChanged.connect(self.handle_date_change)
 
     def load_cities(self):
-        """Carga las poblaciones en el combobox"""
+        """Carga las ciudades disponibles en el combobox correspondiente."""
         self.ui.combo_city.clear()
         cities = self.cities_dao.get_all()
         for city in cities:
             self.ui.combo_city.addItem(city.name, city.id_city)
 
     def load_activities(self):
-        """Carga las actividades disponibles"""
+        """Carga las actividades disponibles y las asigna a los checkboxes."""
         activities = self.activities_dao.get_all()
-        # Asigna las actividades a los checkboxes correspondientes
         for activity in activities:
             if activity.name == "Danza":
                 self.ui.check_danza.setText(activity.name)
@@ -89,34 +132,24 @@ class RegisterStudent(QDialog):
                 self.ui.check_futbol.setText(activity.name)
 
     def handle_date_change(self):
-        """Maneja el cambio de fecha de nacimiento"""
+        """Maneja el cambio en la fecha de nacimiento del estudiante."""
         date = self.ui.date_dob.date().toPython()
-        self.is_minor = self.check_if_minor(date)
+        self.is_minor = check_if_minor(date)
 
-        # Mostrar/ocultar campos de tutor según sea menor
         self.ui.txt_tlf.setVisible(self.is_minor)
         self.ui.line_tlf.setVisible(self.is_minor)
         self.ui.line_tutor.setVisible(self.is_minor)
         self.ui.txt_tutor.setVisible(self.is_minor)
 
-    def check_if_minor(self, date_of_birth):
-        """Determina si el estudiante es menor de age"""
-        today = datetime.now()
-        age = today.year - date_of_birth.year
-        if (today.month, today.day) < (date_of_birth.month, date_of_birth.day):
-            age -= 1
-        return age < 18
-
     def change_mode(self):
-        """Cambia entre modo edición y visualización"""
-        if not self.is_edit:  # Modo visualización
+        """Alterna entre modo edición y modo visualización."""
+        if not self.is_edit:
             self.ui.btn_save.setText("Editar")
             self.ui.btn_delete.setText("Eliminar")
-        else:  # Modo edición
+        else:
             self.ui.btn_save.setText("Guardar")
             self.ui.btn_delete.setText("Cancelar")
 
-        # Habilitar/deshabilitar campos según el modo
         self.ui.line_name.setEnabled(self.is_edit)
         self.ui.line_surname.setEnabled(self.is_edit)
         self.ui.line_dni.setEnabled(self.is_edit)
@@ -132,7 +165,7 @@ class RegisterStudent(QDialog):
         self.ui.line_tlf.setEnabled(self.is_edit)
 
     def initialize_ui(self):
-        """Inicializa la interfaz con los datos del estudiante"""
+        """Inicializa la interfaz con los datos del estudiante."""
         self.setup_date()
         self.load_cities()
         self.ui.radio_distancia.setChecked(True)
@@ -140,7 +173,7 @@ class RegisterStudent(QDialog):
             self.load_student_data()
 
     def setup_date(self):
-        """Configura el widget de fecha"""
+        """Configura el widget de fecha con valores iniciales."""
         current_date = QDate.currentDate()
         self.ui.date_dob.setDate(current_date)
         self.ui.date_dob.setMaximumDate(current_date)
@@ -148,7 +181,7 @@ class RegisterStudent(QDialog):
         self.ui.date_dob.setDisplayFormat("yyyy-MM-dd")
 
     def load_student_data(self):
-        """Carga los datos del estudiante en la interfaz"""
+        """Carga los datos del estudiante en los controles del formulario."""
         if self.student:
             self.ui.line_name.setText(self.student.name)
             self.ui.line_surname.setText(self.student.surname)
@@ -169,7 +202,6 @@ class RegisterStudent(QDialog):
                 self.ui.line_tutor.setText(self.student.tutor)
                 self.ui.line_tlf.setText(self.student.phone_tutor)
 
-            # Cargar actividades del estudiante
             student_activities = self.student_activities_dao.get_by_student(self.student.id_student)
             for activity in student_activities:
                 if activity['actividad_nombre'] == "Danza":
@@ -180,7 +212,7 @@ class RegisterStudent(QDialog):
                     self.ui.check_futbol.setChecked(True)
 
     def handle_save_button(self):
-        """Maneja la acción del botón guardar/editar"""
+        """Maneja el evento de clic en el botón Guardar/Editar."""
         if self.is_edit:
             if self.validate_data():
                 self.save_student()
@@ -191,7 +223,7 @@ class RegisterStudent(QDialog):
             self.change_mode()
 
     def handle_delete_button(self):
-        """Maneja la acción del botón eliminar/cancelar"""
+        """Maneja el evento de clic en el botón Eliminar/Cancelar."""
         if self.is_edit:
             self.is_edit = False
             self.change_mode()
@@ -200,7 +232,11 @@ class RegisterStudent(QDialog):
             self.delete_student()
 
     def validate_data(self):
-        """Valida los datos del formulario"""
+        """Valida los datos ingresados en el formulario.
+
+        Returns:
+            bool: True si los datos son válidos, False en caso contrario
+        """
         name = not Validation.is_empty(self.ui.line_name.text().strip())
         surname = not Validation.is_empty(self.ui.line_surname.text().strip())
         dni = not Validation.is_empty(self.ui.line_dni.text().strip())
@@ -221,15 +257,8 @@ class RegisterStudent(QDialog):
 
         return True
 
-    def generate_username(self, name, surnames):
-        """Genera un name de user automático"""
-        parts = surnames.strip().split()
-        surname = parts[0]
-        username = name[0].lower() + surname.lower()
-        return username.replace(" ", "")
-
     def save_student(self):
-        """Guarda o actualiza el estudiante en la base de datos"""
+        """Guarda o actualiza los datos del estudiante en la base de datos."""
         name = self.ui.line_name.text().strip()
         surnames = self.ui.line_surname.text().strip()
         dni = self.ui.line_dni.text().strip()
@@ -239,9 +268,8 @@ class RegisterStudent(QDialog):
         city_id = self.ui.combo_city.currentData()
         modality = 'Presencial' if self.ui.radio_presencial.isChecked() else 'A Distancia'
         birth_date = self.ui.date_dob.date().toPython()
-        username = self.generate_username(name, surnames)
+        username = generate_username(name, surnames)
 
-        # Obtener actividades seleccionadas
         selected_activities = []
         if self.ui.check_danza.isChecked():
             selected_activities.append("Danza")
@@ -264,7 +292,6 @@ class RegisterStudent(QDialog):
             else:
                 self.student_dao.update(student)
 
-            # Gestionar actividades
             self.student_activities_dao.remove_all_activities(self.student_id)
             activities = self.activities_dao.get_all()
             for activity in selected_activities:
@@ -276,30 +303,13 @@ class RegisterStudent(QDialog):
             MessageBox(f"No se pudo guardar el estudiante: {str(e)}", "error").show()
 
     def delete_student(self):
-        """Elimina el estudiante de la base de datos"""
+        """Elimina el estudiante de la base de datos después de confirmación."""
         response = MessageBox("¿Desea eliminar este estudiante? Esto eliminará también toda la información relacionada", "question", buttons=("Yes", "No")).show()
 
         if response == "Yes":
-            # Elimina las reservas y al cliente
             self.student_activities_dao.remove_all_activities(self.student_id)
             self.student_dao.delete(self.student_id)
-            response = MessageBox("Estudiante eliminado").show() # Muestra mensaje de éxito
+            response = MessageBox("Estudiante eliminado").show()
             if response:
-                self.accept()  # Cierra la ventana de cliente
+                self.accept()
                 self.close()
-
-    def clear_form(self):
-        """Limpia el formulario"""
-        self.ui.line_name.clear()
-        self.ui.line_surname.clear()
-        self.ui.line_dni.clear()
-        self.ui.line_tutor.clear()
-        self.ui.line_tlf.clear()
-        self.setup_date()
-        self.ui.spint_distant.setValue(0)
-        self.ui.combo_city.setCurrentIndex(0)
-        self.ui.radio_presencial.setChecked(True)
-        self.ui.radio_distancia.setChecked(False)
-        self.ui.check_danza.setChecked(False)
-        self.ui.check_ajedrez.setChecked(False)
-        self.ui.check_futbol.setChecked(False)
