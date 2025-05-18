@@ -18,13 +18,13 @@ def login(app):
         bool: Retorna True si el login fue exitoso, False en caso contrario.
     """
     login_window = QMainWindow()
-    login_controler = LoginController(login_window)
+    login_controller = LoginController(login_window)
     login_window.show()
 
     # Inicia el ciclo de evsentos de la aplicación Qt (esto hace que la ventana se muestre y se quede activa).
     app.exec()
 
-    return login_controler.bLogado
+    return login_controller.bLogado
 
 
 def init_app(app):
