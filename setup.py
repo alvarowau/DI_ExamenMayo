@@ -7,8 +7,8 @@ setup(
     # Versión del paquete
     version="1.0",
     
-    # Encontrar automáticamente los paquetes dentro de "ejercicio"
-    packages=find_packages(include=["ejercicio", "ejercicio.*"]),
+    # Encontrar automáticamente los paquetes dentro de "scr"
+    packages=find_packages(include=["scr", "scr.*"]),
     
     # Dependencias necesarias para el funcionamiento del paquete
     install_requires=[
@@ -39,7 +39,7 @@ setup(
     # Definición de scripts de línea de comandos
     entry_points={
         "console_scripts": [
-            "examen = ejercicio.main:main",  # Ejecuta la función `main()` dentro de `ejercicio/main.py`
+            "examen = scr.main:main",  # Ejecuta la función `main()` dentro de `scr/main.py`
         ]
     },
     
