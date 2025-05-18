@@ -2,12 +2,12 @@ from PySide6.QtWidgets import QAbstractItemView, QDialog, QHeaderView
 from PySide6.QtGui import QStandardItem, QStandardItemModel
 from PySide6.QtCore import QModelIndex
 
-from scr.view.estudiantes_ui import Ui_Estudiantes
+from scr.view.ui_students import Ui_students
 from scr.models.datos import EstudiantesDAO, PoblacionesDAO
 from scr.controller.estudiante_create_edit_controller import EstudianteController
 from scr.util.message_box import MessageBox
 
-class EstudiantesController(QDialog):
+class StudentsController(QDialog):
     """
     Controlador de la interfaz para gestionar estudiantes. Esta clase se encarga de manejar la interacción con la
     UI, los eventos, y la lógica asociada a la gestión de estudiantes.
@@ -18,7 +18,11 @@ class EstudiantesController(QDialog):
         Constructor de la clase, inicializa la interfaz de usuario y configura los eventos necesarios.
         """
         super().__init__()  # Llama al constructor de la clase base QDialog
-        self.ui = Ui_Estudiantes()  # Instancia la UI de los estudiantes
+        self.controlador = None
+        self.model = None
+        self.dao_estudiante = None
+        self.estudiante_seleccionado = None
+        self.ui = Ui_students()  # Instancia la UI de los estudiantes
         self.ui.setupUi(self)  # Configura la interfaz de usuario
         self.init_ui()  # Llama al método para inicializar la UI y los eventos
 
@@ -39,25 +43,9 @@ class EstudiantesController(QDialog):
         Configura los eventos de la interfaz de usuario, como los clics en los botones.
         """
         # Conecta los botones a sus respectivas funciones
-        self.ui.vcGridEstudiantes.clicked.connect(self.click_estudiante)  # Evento de clic en la tabla de estudiantes
-        self.ui.vcbtnModificar.clicked.connect(lambda: self.open_modal(False))  # Evento de clic en "Modificar"
-        self.ui.vcbtnNuevo.clicked.connect(lambda: self.open_modal(True))  # Evento de clic en "Nuevo"
-        # self.ui.vcbtnEliminar.clicked.connect(self.eliminar_estudiante)  # Evento de clic en "Eliminar"
-        # self.ui.vcbtnBuscar.clicked.connect(self.buscar_estudiantes)  # Evento de clic en "Buscar"
-        # self.ui.vccboPoblacion.currentIndexChanged.connect(self.filtrar_por_poblacion)  # Evento de cambio en población
-
-    def load_poblaciones(self):
-        """
-        Carga las poblaciones en el combobox de filtrado.
-        """
-        dao_poblaciones = PoblacionesDAO()
-        poblaciones = dao_poblaciones.get_all()
-        
-        self.ui.cboPoblacion.clear()
-        self.ui.cboPoblacion.addItem("Todas las poblaciones", 0)
-        
-        for poblacion in poblaciones:
-            self.ui.cboPoblacion.addItem(poblacion.nombre, poblacion.id_poblacion)
+        self.ui.table_student.clicked.connect(self.click_estudiante)  # Evento de clic en la tabla de estudiantes
+        self.ui.btn_modify.clicked.connect(lambda: self.open_modal(False))  # Evento de clic en "Modificar"
+        self.ui.btn_new.clicked.connect(lambda: self.open_modal(True))  # Evento de clic en "Nuevo"
 
     def config_table(self):
         """
@@ -99,13 +87,13 @@ class EstudiantesController(QDialog):
                 self.model.setItem(row, 6, QStandardItem(str(estudiante.id_estudiante)))
 
             # Configurar la vista de tabla
-            self.ui.vcGridEstudiantes.setModel(self.model)
-            self.ui.vcGridEstudiantes.setColumnHidden(6, True)  # Ocultamos la columna ID
-            self.ui.vcGridEstudiantes.resizeColumnsToContents()
-            self.ui.vcGridEstudiantes.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
-            self.ui.vcGridEstudiantes.setSelectionBehavior(QAbstractItemView.SelectRows)
-            self.ui.vcGridEstudiantes.setSelectionMode(QAbstractItemView.SingleSelection)
-            self.ui.vcGridEstudiantes.setEditTriggers(QAbstractItemView.NoEditTriggers)
+            self.ui.table_student.setModel(self.model)
+            self.ui.table_student.setColumnHidden(6, True)  # Ocultamos la columna ID
+            self.ui.table_student.resizeColumnsToContents()
+            self.ui.table_student.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+            self.ui.table_student.setSelectionBehavior(QAbstractItemView.SelectRows)
+            self.ui.table_student.setSelectionMode(QAbstractItemView.SingleSelection)
+            self.ui.table_student.setEditTriggers(QAbstractItemView.NoEditTriggers)
             
         except Exception as e:
             MessageBox("No se pudo cargar la tabla de estudiantes: {str(e)}", "error").show()
@@ -165,25 +153,3 @@ class EstudiantesController(QDialog):
                     MessageBox("Error al eliminar estudiante", "error", str(e)).show()
         else:
             MessageBox("Seleccione un estudiante para eliminar", "warning").show()
-
-    def buscar_estudiantes(self):
-        """
-        Busca estudiantes según el texto ingresado en el campo de búsqueda.
-        """
-        texto_busqueda = self.ui.txtBuscar.text().strip()
-        if texto_busqueda:
-            estudiantes = self.dao_estudiante.buscar_por_nombre(texto_busqueda)
-            self.config_table(estudiantes)
-        else:
-            self.config_table()
-
-    def filtrar_por_poblacion(self):
-        """
-        Filtra los estudiantes por la población seleccionada en el combobox.
-        """
-        poblacion_id = self.ui.cboPoblacion.currentData()
-        if poblacion_id and poblacion_id > 0:
-            estudiantes = self.dao_estudiante.filtrar_por_poblacion(poblacion_id)
-            self.config_table(estudiantes)
-        else:
-            self.config_table()

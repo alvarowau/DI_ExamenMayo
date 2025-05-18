@@ -45,7 +45,7 @@ class MessageBox(QMessageBox):
 
         self.setStandardButtons(selected_buttons)
         
-    def show(self):
+    def show(self) -> str:
         """
         Muestra el cuadro de mensaje y devuelve el botón seleccionado.
 

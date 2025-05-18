@@ -5,7 +5,7 @@ from PySide6.QtWidgets import QApplication, QMainWindow, QDialog
 
 from scr.controller.login_controller import LoginController
 from scr.controller.connection_controller import ConnectionController
-from scr.controller.estudiantes_controller import EstudiantesController
+from scr.controller.students_controller import StudentsController
 
 def login(app):
     """
@@ -37,7 +37,7 @@ def init_app(app):
         app (QApplication): Instancia de la aplicación Qt que se utilizará para ejecutar el ciclo de eventos de la GUI.
     """
 
-    main_window = EstudiantesController()
+    main_window = StudentsController()
     main_window.setModal(True)
     main_window.show()
 
