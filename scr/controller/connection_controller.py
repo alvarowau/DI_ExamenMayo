@@ -1,12 +1,12 @@
 from PySide6.QtWidgets import QDialog
 from scr.models.config import DBConfig
-from scr.models.datos import BaseDAO
+from scr.models.repository import Repository
 from scr.util.message_box import MessageBox
 from scr.view.ui_connection_db import Ui_connection_bd
 
 class ConnectionController(QDialog):
     '''
-    Clase que se encarga de mostrar el apartado de "Conexion BD" para que el usuario indica a donde apunta la BD con la que va a trabajar
+    Clase que se encarga de mostrar el apartado de "Conexion BD" para que el user indica a donde apunta la BD con la que va a trabajar
     '''
     def __init__(self):
         super().__init__()
@@ -34,7 +34,7 @@ class ConnectionController(QDialog):
 
         # Verificar conexión a la base de datos
         try:
-            dao = BaseDAO()  # Intenta conectar con la BD
+            dao = Repository()  # Intenta conectar con la BD
             dao.close()  # Si funciona, cierra la conexión
             MessageBox("Conexión exitosa").show()
             self.accept()  # Cierra el diálogo con éxito

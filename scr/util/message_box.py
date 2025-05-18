@@ -50,9 +50,9 @@ class MessageBox(QMessageBox):
         Muestra el cuadro de mensaje y devuelve el botón seleccionado.
 
         Returns:
-            str: El botón que el usuario seleccionó.
+            str: El botón que el user seleccionó.
         """
         response = self.exec()
         for name, btn in QMessageBox.StandardButton.__members__.items():
             if btn == response:
-                return name  # Devuelve el nombre del botón seleccionado
+                return name  # Devuelve el name del botón seleccionado

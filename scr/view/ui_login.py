@@ -142,7 +142,7 @@ class Ui_Login(object):
 #endif // QT_CONFIG(tooltip)
         self.txt_user.setText(QCoreApplication.translate("Login", u"Usuario", None))
 #if QT_CONFIG(tooltip)
-        self.line_user.setToolTip(QCoreApplication.translate("Login", u"Ingrese su usuario", None))
+        self.line_user.setToolTip(QCoreApplication.translate("Login", u"Ingrese su user", None))
 #endif // QT_CONFIG(tooltip)
 #if QT_CONFIG(tooltip)
         self.txt_password.setToolTip(QCoreApplication.translate("Login", u"Contrase\u00f1a", None))

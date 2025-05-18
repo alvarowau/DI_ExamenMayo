@@ -3,88 +3,89 @@ from PySide6.QtGui import QStandardItem, QStandardItemModel
 from PySide6.QtCore import QModelIndex
 
 from scr.view.ui_students import Ui_students
-from scr.models.datos import EstudiantesDAO, PoblacionesDAO
-from scr.controller.estudiante_create_edit_controller import EstudianteController
+from scr.models.repository import StudentRepository, CitiesRepository
+from scr.controller.register_students_controller import RegisterStudent
 from scr.util.message_box import MessageBox
+
 
 class StudentsController(QDialog):
     """
     Controlador de la interfaz para gestionar estudiantes. Esta clase se encarga de manejar la interacción con la
     UI, los eventos, y la lógica asociada a la gestión de estudiantes.
     """
-    
+
     def __init__(self):
         """
-        Constructor de la clase, inicializa la interfaz de usuario y configura los eventos necesarios.
+        Constructor de la clase, inicializa la interfaz de user y configura los eventos necesarios.
         """
         super().__init__()  # Llama al constructor de la clase base QDialog
-        self.controlador = None
+        self.controller = None
         self.model = None
-        self.dao_estudiante = None
-        self.estudiante_seleccionado = None
+        self.student_dao = None
+        self.selected_student = None
         self.ui = Ui_students()  # Instancia la UI de los estudiantes
-        self.ui.setupUi(self)  # Configura la interfaz de usuario
-        self.init_ui()  # Llama al método para inicializar la UI y los eventos
+        self.ui.setupUi(self)  # Configura la interfaz de user
+        self.initialize_ui()  # Llama al método para inicializar la UI y los eventos
 
-    def init_ui(self):
+    def initialize_ui(self):
         """
-        Método para configurar la interfaz de usuario y los eventos.
+        Método para configurar la interfaz de user y los eventos.
         """
         try:
-            self.config_events()  # Configura los eventos de la UI
-            self.config_table()  # Configura la tabla de estudiantes
+            self.setup_events()  # Configura los eventos de la UI
+            self.setup_table()  # Configura la tabla de estudiantes
             # self.load_poblaciones()  # Carga las poblaciones en el combobox
         except Exception as e:
             # En caso de error, se muestra un mensaje de error con la descripción
             MessageBox("Error al configurar la UI", "error", str(e)).show()
 
-    def config_events(self):
+    def setup_events(self):
         """
-        Configura los eventos de la interfaz de usuario, como los clics en los botones.
+        Configura los eventos de la interfaz de user, como los clics en los botones.
         """
         # Conecta los botones a sus respectivas funciones
-        self.ui.table_student.clicked.connect(self.click_estudiante)  # Evento de clic en la tabla de estudiantes
+        self.ui.table_student.clicked.connect(self.on_student_click)  # Evento de clic en la tabla de estudiantes
         self.ui.btn_modify.clicked.connect(lambda: self.open_modal(False))  # Evento de clic en "Modificar"
         self.ui.btn_new.clicked.connect(lambda: self.open_modal(True))  # Evento de clic en "Nuevo"
 
-    def config_table(self):
+    def setup_table(self):
         """
         Configura la tabla que muestra los estudiantes.
         """
         try:
-            self.dao_estudiante = EstudiantesDAO()
-            self.estudiante_seleccionado = None
-            
+            self.student_dao = StudentRepository()
+            self.selected_student = None
+
             headers = ["Nombre", "Apellidos", "DNI", "Población", "Modalidad", "Usuario"]
-            
+
             # Obtener la lista de estudiantes
-            estudiantes = self.dao_estudiante.get_all()
-            
+            students = self.student_dao.get_all()
+
             # Si get_all() devuelve un solo estudiante (no lista), lo convertimos a lista
-            if estudiantes and not isinstance(estudiantes, list):
-                estudiantes = [estudiantes]
-            
+            if students and not isinstance(students, list):
+                students = [students]
+
             # Si no hay estudiantes, usamos lista vacía
-            if not estudiantes:
-                estudiantes = []
-            
+            if not students:
+                students = []
+
             # Crear modelo con el número de filas igual a la cantidad de estudiantes
-            self.model = QStandardItemModel(len(estudiantes), len(headers))
+            self.model = QStandardItemModel(len(students), len(headers))
             self.model.setHorizontalHeaderLabels(headers)
 
             # Rellenar la tabla con datos
-            for row, estudiante in enumerate(estudiantes):
-                poblacion_dao = PoblacionesDAO()
-                poblacion = poblacion_dao.get(estudiante.id_poblacion)
-                
-                self.model.setItem(row, 0, QStandardItem(estudiante.nombre))
-                self.model.setItem(row, 1, QStandardItem(estudiante.apellidos))
-                self.model.setItem(row, 2, QStandardItem(estudiante.dni))
-                self.model.setItem(row, 3, QStandardItem(poblacion.nombre if poblacion else ""))
-                self.model.setItem(row, 4, QStandardItem(estudiante.modalidad))
-                self.model.setItem(row, 5, QStandardItem(estudiante.usuario))
+            for row, student in enumerate(students):
+                city_dao = CitiesRepository()
+                city = city_dao.get(student.id_city)
+
+                self.model.setItem(row, 0, QStandardItem(student.name))
+                self.model.setItem(row, 1, QStandardItem(student.surname))
+                self.model.setItem(row, 2, QStandardItem(student.dni))
+                self.model.setItem(row, 3, QStandardItem(city.name if city else ""))
+                self.model.setItem(row, 4, QStandardItem(student.modalidad))
+                self.model.setItem(row, 5, QStandardItem(student.user))
                 # Guardamos el ID en la columna oculta
-                self.model.setItem(row, 6, QStandardItem(str(estudiante.id_estudiante)))
+                self.model.setItem(row, 6, QStandardItem(str(student.id_student)))
 
             # Configurar la vista de tabla
             self.ui.table_student.setModel(self.model)
@@ -94,61 +95,62 @@ class StudentsController(QDialog):
             self.ui.table_student.setSelectionBehavior(QAbstractItemView.SelectRows)
             self.ui.table_student.setSelectionMode(QAbstractItemView.SingleSelection)
             self.ui.table_student.setEditTriggers(QAbstractItemView.NoEditTriggers)
-            
-        except Exception as e:
-            MessageBox("No se pudo cargar la tabla de estudiantes: {str(e)}", "error").show()
 
-    def open_modal(self, nuevo: bool):
+        except Exception as e:
+            print(str(e))
+            MessageBox("No se pudo cargar la tabla de estudiantes", "error", details=str(e)).show()
+
+    def open_modal(self, new: bool):
         """
         Abre un modal para la creación o modificación de un estudiante.
-        
-        :param nuevo: Si es True, abre el modal para crear un nuevo estudiante. 
+
+        :param nuevo: Si es True, abre el modal para crear un nuevo estudiante.
                      Si es False, abre el modal para modificar el estudiante seleccionado.
         """
-        if self.estudiante_seleccionado is not None or nuevo:
-            if nuevo:
-                self.controlador = EstudianteController(None)
+        if self.selected_student is not None or new:
+            if new:
+                self.controller = RegisterStudent(None)
             else:
-                self.controlador = EstudianteController(self.estudiante_seleccionado)
+                self.controller = RegisterStudent(self.selected_student)
 
-            if not isinstance(self.controlador, QDialog):
+            if not isinstance(self.controller, QDialog):
                 raise TypeError("El controlador debe heredar de QDialog para ser modal.")
-            
-            self.controlador.setModal(True)
-            self.controlador.finished.connect(self.config_table)  # Actualiza tabla al cerrar
-            self.controlador.exec()
+
+            self.controller.setModal(True)
+            self.controller.finished.connect(self.setup_table)  # Actualiza tabla al cerrar
+            self.controller.exec()
         else:
             MessageBox("Seleccione un estudiante para ver los datos", "warning").show()
 
-    def click_estudiante(self, index: QModelIndex):
+    def on_student_click(self, index: QModelIndex):
         """
         Maneja el evento de clic en una fila de la tabla de estudiantes.
-        
+
         :param index: Índice de la fila clickeada en la tabla.
         """
         row = index.row()
-        estudiante_id_item = self.model.item(row, 6)  # Obtiene el valor de la columna "Id" (oculta)
+        student_id_item = self.model.item(row, 6)  # Obtiene el valor de la columna "Id" (oculta)
 
-        if estudiante_id_item:
-            self.estudiante_seleccionado = int(estudiante_id_item.text()) if estudiante_id_item.text() else None
+        if student_id_item:
+            self.selected_student = int(student_id_item.text()) if student_id_item.text() else None
 
-    def eliminar_estudiante(self):
+    def delete_student(self):
         """
         Elimina el estudiante seleccionado de la base de datos.
         """
-        if self.estudiante_seleccionado:
-            confirmacion = MessageBox(
+        if self.selected_student:
+            Confirmation = MessageBox(
                 "¿Está seguro de eliminar este estudiante?",
                 "question",
                 "Esta acción no se puede deshacer."
             ).show()
-            
-            if confirmacion:
+
+            if Confirmation:
                 try:
-                    self.dao_estudiante.delete(self.estudiante_seleccionado)
+                    self.student_dao.delete(self.selected_student)
                     MessageBox("Estudiante eliminado correctamente", "info").show()
-                    self.config_table()  # Actualiza la tabla
-                    self.estudiante_seleccionado = None
+                    self.setup_table()  # Actualiza la tabla
+                    self.selected_student = None
                 except Exception as e:
                     MessageBox("Error al eliminar estudiante", "error", str(e)).show()
         else:

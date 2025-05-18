@@ -30,8 +30,8 @@ setup(
     ],
     
     # Información del autor del paquete
-    author="Valentina Alessandra Calicchia",
-    author_email="valentinacalicchia@gmail.com",
+    author="AlvaroWau",
+    author_email="alvarowau12@proton.me",
     
     # Breve descripción del paquete
     description="Alta de alumnos",

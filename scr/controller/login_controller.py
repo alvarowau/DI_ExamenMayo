@@ -2,12 +2,12 @@ from PySide6.QtCore import QObject
 from PySide6.QtWidgets import QWidget
 from scr.view.ui_login import Ui_Login
 from scr.util.message_box import MessageBox
-from scr.models.datos import UsuariosDAO
+from scr.models.repository import UserDAO
 
 
 class LoginController(Ui_Login, QObject):
     """
-    Controlador para gestionar el proceso de inicio de sesión en la interfaz de usuario.
+    Controlador para gestionar el proceso de inicio de sesión en la interfaz de user.
     """
 
     def __init__(self, login_window: QWidget):
@@ -17,9 +17,9 @@ class LoginController(Ui_Login, QObject):
         Args:
             login_window (QWidget): La ventana de inicio de sesión.
         """
-        self.bLogado = False  # Variable para controlar si el usuario ha iniciado sesión con éxito
+        self.bLogado = False  # Variable para controlar si el user ha iniciado sesión con éxito
         super().__init__()
-        self.ui = Ui_Login()  # Inicializa la interfaz de usuario del login
+        self.ui = Ui_Login()  # Inicializa la interfaz de user del login
         self.login_window = login_window  # Asigna la ventana pasada como parámetro
         self.ui.setupUi(self.login_window)  # Configura la UI en la ventana de login
 
@@ -28,13 +28,13 @@ class LoginController(Ui_Login, QObject):
 
         self.ui.btn_login.clicked.connect(self.login)  # Conecta el botón de acceso con la función login
 
-        self.usuarios_dao = UsuariosDAO()
+        self.usuarios_dao = UserDAO()
 
     def login(self):
         """
-        Maneja el proceso de autenticación del usuario cuando se presiona el botón de acceso.
+        Maneja el proceso de autenticación del user cuando se presiona el botón de acceso.
         """
-        # Obtiene y limpia los datos ingresados por el usuario
+        # Obtiene y limpia los datos ingresados por el user
         user = self.ui.line_user.text().strip()
         pwd = self.ui.line_password.text().strip()
 
@@ -61,14 +61,14 @@ class LoginController(Ui_Login, QObject):
 
     def autenticar(self, user, pwd):
         """
-        Verifica las credenciales del usuario llamando a la función check_credentials de UsuariosDAO.
+        Verifica las credenciales del user llamando a la función check_credentials de UserDAO.
 
         Args:
-            user (str): Nombre de usuario ingresado.
+            user (str): Nombre de user ingresado.
             pwd (str): Contraseña ingresada.
 
         Returns:
             bool: True si las credenciales son correctas, False en caso contrario.
         """
-        # Llama al método check_credentials de UsuariosDAO para verificar las credenciales
+        # Llama al método check_credentials de UserDAO para verificar las credenciales
         return self.usuarios_dao.check_credentials(user, pwd)

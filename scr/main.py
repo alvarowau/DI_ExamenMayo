@@ -9,7 +9,7 @@ from scr.controller.students_controller import StudentsController
 
 def login(app):
     """
-    Función que maneja la ventana de login y retorna si el usuario ha iniciado sesión correctamente.
+    Función que maneja la ventana de login y retorna si el user ha iniciado sesión correctamente.
 
     Args:
         app (QApplication): Instancia de la aplicación Qt que se utilizará para ejecutar el ciclo de eventos de la GUI.
